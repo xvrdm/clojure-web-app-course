@@ -4,11 +4,14 @@
 
 After setting up a new project in Leiningen with `lein new <project-name>`, you must add the required dependencies in the `project.clj` file: their is an vector just for that. By default, only the clojure language itself will be listed in the dependency vector.
 
+### Adding ring as a dependency
+
 For a web project, we want to use the `ring` package, which map HTTP requests to clojure functions calls (similar to `rake` in ruby or `wsgi` in python). Add it to the dependencies. 
 
 ```clojure
+...
 :dependencies [[org.clojure/clojure "1.7.0"]
-               [ring "1.2.0"]]
+               [ring "1.2.0"]])
 ```
 
 Calling `ring` is in fact a shortcut for a bundle of libraries:
@@ -21,4 +24,57 @@ Leiningen will download listed dependencies automatically. If you want to force 
 
 ```
 $ lein deps
+```
+
+### Adding the ring plugin
+
+When writing a ring project, there are some common tasks:
+- Pointing to default Ring handler function
+- Defining functions to be called upon creation and destruction of our web app instance, like a database connection opening / closing
+- Starting and configuring standalone Ring web server for development (usually via the jetty adapter)
+- Building war or uberjar package
+- Reloading the Namespace
+
+Leiningen has a bunch of plugins that can be installed to simplify development and there is one for Ring project, named [Lein-ring](https://github.com/weavejester/lein-ring).
+
+Plugins are also added to the `project.clj` file, under a `:plugin` key. There is none by default. 
+
+```clojure
+...
+:dependencies [[org.clojure/clojure "1.7.0"]
+               [ring "1.2.0"]]
+:plugins [[lein-ring "0.8.7"]])
+```
+
+The functionalities added by the plugin are configured just below it.
+
+```clojure
+...
+:dependencies [[org.clojure/clojure "1.7.0"]
+               [ring "1.2.0"]]
+:plugins [[lein-ring "0.8.7"]]
+:ring {:handler server.core/example-handler ;; function called upon request [name it as you like]
+       :init    server.core/on-init         ;; function called upon creation [name it as you want]
+       :destroy server.core/on-destroy})    ;; function called upon destruction [name it as you wish]
+```
+
+The `:handler` function will map HTTP requests to our Clojure code and give us access to request data. It will also help us to create adequate response. 
+
+## A simple server
+
+A super simple handler function could just send back the string "Hello Clojure" as response for all requests.
+
+```clojure
+(def example-handler [request]  ;; receives request as argument from Ring
+  {:body "Hello Clojure"})      ;; respond with a map with key body.
+```
+
+Super simple `:init` and `:destroy` functions could just inform us that the server has been launched/destroyed.
+
+```clojure
+(defn on-init []
+  (println "Initializing sample webapp!"))
+
+(defn on-destroy []
+  (println "Destroying sample webapp!"))
 ```

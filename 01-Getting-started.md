@@ -78,3 +78,21 @@ Super simple `:init` and `:destroy` functions could just inform us that the serv
 (defn on-destroy []
   (println "Destroying sample webapp!"))
 ```
+
+To launch a development server, type:
+
+```
+$ lein ring server-headless
+```
+
+A nice goodie of clojure/ring is included live-code-reloading. We don't have to stop and restart the server everytime we change the code. 
+
+## Additional config options
+
+Ring has lots of config options that can be setup in `project.clj`:
+
+```clojure
+:ring {:handler server.core/example-handler ;; function called upon request [name it as you like]
+       :port    4004                        ;; favorite port
+       :init    server.core/on-init         ;; function called upon creation [name it as you want]
+       :destroy server.core/on-destroy})    ;; function called upon destruction [name it as you wish]

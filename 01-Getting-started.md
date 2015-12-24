@@ -92,7 +92,50 @@ A nice goodie of clojure/ring is included live-code-reloading. We don't have to 
 Ring has lots of config options that can be setup in `project.clj`:
 
 ```clojure
-:ring {:handler server.core/example-handler ;; function called upon request [name it as you like]
+:ring {:handler server.core/example-handler ;; function called upon request (name it as you like)
        :port    4004                        ;; favorite port
-       :init    server.core/on-init         ;; function called upon creation [name it as you want]
-       :destroy server.core/on-destroy})    ;; function called upon destruction [name it as you wish]
+       :init    server.core/on-init         ;; function called upon creation (name it as you want)
+       :destroy server.core/on-destroy}     ;; function called upon destruction (name it as you wish)
+```
+
+## Packaging the app
+There are several formats to package an app.
+
+### Uberjar
+When the app is simple and doesn't require advanced functionalities, the uberjar format can be used. It packages the app and its dependencies into one file. 
+
+The Lein ring plugin provide a helper function to easily create an uberjar.
+
+```
+$ lein ring uberjar
+```
+
+The uberjar file can be used directly with java.
+
+```
+$ java -jar <uberjar-file>
+```
+
+### Uberwar
+If we want more complex functionalities (e.g running multiple web apps on the same port), we probably need to run the app behind a web application container like Apache Tomcat. For this, the uberwar format is fitter than uberjar.
+
+The Uberwar format also combines app and dependencies into one file.
+
+```
+$ lein ring uberwar project1.war
+```
+
+We can then launch a tomcat instance and copy the uberwar file into tomcat's `/webapp` directory to trigger deployement. 
+
+```
+$ cd ~/apache-tomcat-8.0.0-RC3 ./bin/startup.sh
+$ cp project1.war ~/apache-tomcat-8.0.0-RC3/webapps/
+```
+
+The app will be available under its name subdomain: `localhost:8080/project1/`. You can monitor the output of your webapp in the catalina log:
+
+```
+$ tail -F  ~/apache-tomcat-8.0.0-RC3/logs/catalina.out
+```
+
+
